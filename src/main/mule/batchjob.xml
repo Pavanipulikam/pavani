@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="bd143166-3f9f-4009-ab0a-3cac1038757a" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="batchjobFlow" doc:id="7050b317-6c89-49d2-a5be-563ad32e2120" >
+		<http:listener doc:name="Listener" doc:id="731752dc-40f2-48d6-83f8-3cb1e04575f2" config-ref="HTTP_Listener_config" path="/batch"/>
+		<set-payload value='#[[1,2,"a",4,5,"b","c",6]]' doc:name="input" doc:id="297f4722-ba57-498c-b693-b5a68db02657" />
+		<batch:job jobName="batchjobBatch_Job" doc:id="1dfbf3d4-55e2-4bcc-b1c6-efb777faf63e" maxFailedRecords="10">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="0273489a-cb34-4a9b-b43e-6e0d916b28d5" >
+					<set-payload value="#[payload * 10]" doc:name="multiple" doc:id="c6a8febb-4655-4ce7-b03a-b8f0638d1bef" />
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="6bd26ff8-35e5-4bd2-9e2b-020b8b8f70d0" size="2">
+						<logger level="INFO" doc:name="Logger" doc:id="985f4379-799c-4ba6-94b9-16dfd56ac6fc" message="#[payload]"/>
+					</batch:aggregator>
+				</batch:step>
+				<batch:step name="Batch_Step1" doc:id="91b2bc59-c003-4d53-81ae-bc4673d1046b" >
+					<set-payload value="#[payload + 5]" doc:name="addition" doc:id="b2e61693-60e0-42d7-ab25-1e1875e58ed8" />
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="a82df6c3-f62f-4ee3-8722-2e99407d57bf" size="2">
+						<logger level="WARN" doc:name="Logger" doc:id="d50060fb-3214-4978-95e3-e243dfa65d39" message="#[payload]"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete>
+				<logger level="INFO" doc:name="Logger" doc:id="f1e34aeb-d187-4c2d-8f75-3098bb46e655" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+</mule>
